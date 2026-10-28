@@ -1,0 +1,232 @@
+<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>BOEFJACHT</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,700;0,800;1,800&display=swap">
+<style>
+:root{--navy:#050B24;--map:#070F5C;--blue:#00A8FF;--hunter:#168BFF;--yellow:#FFC21F;--boef:#FFB81C;--white:#F5F7FF;--panel:#05070D;--mute:#A6B2CC;--orange:#F26A1B;--line:#1A2A8A;--lime:#E8F04A;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;background:var(--navy);color:var(--white);font:500 18px 'Barlow Condensed',system-ui,sans-serif;overflow:hidden}
+#app{position:relative;height:100%}
+.screen{display:none;position:absolute;inset:0;overflow:auto;padding:20px;max-width:560px;margin:auto;flex-direction:column;gap:12px}
+.screen.on{display:flex}
+#s-live{max-width:none;padding:0;overflow:hidden}
+#s-welcome{justify-content:center;text-align:center;background:radial-gradient(circle at 50% 30%,#0b1a7a,transparent 60%),linear-gradient(#1A2A8A33 1px,transparent 1px) 0 0/40px 40px,linear-gradient(90deg,#1A2A8A33 1px,transparent 1px) 0 0/40px 40px}
+.logo{font-weight:800;font-size:56px;letter-spacing:2px;line-height:1;text-transform:uppercase;font-style:italic}.logo span{color:var(--yellow)}
+.tag1{color:var(--mute);font-size:20px;margin-bottom:12px}
+h2{font-size:30px;text-transform:uppercase;letter-spacing:1px;font-weight:800}
+.btn{height:54px;border:2px solid var(--hunter);background:transparent;color:var(--white);font:800 20px inherit;font-family:inherit;letter-spacing:2px;text-transform:uppercase;cursor:pointer;padding:0 18px;border-radius:3px}
+.btn.y{background:var(--yellow);border-color:var(--yellow);color:#050B24}.btn.sm{height:40px;font-size:16px}
+.btn:active{transform:scale(.98)}
+label{display:flex;flex-direction:column;gap:4px;color:var(--mute);font-size:15px;text-transform:uppercase;letter-spacing:1px}
+input,select{height:48px;background:var(--panel);border:1px solid var(--line);color:var(--white);font:600 19px inherit;font-family:inherit;padding:0 12px;border-radius:3px}
+.chk{flex-direction:row;align-items:flex-start;gap:10px;text-transform:none;font-size:16px;letter-spacing:0}.chk input{height:22px;width:22px;flex:none}
+.note{color:var(--mute);font-size:15px;line-height:1.3;border-left:3px solid var(--orange);padding-left:10px}
+.row{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);padding:10px 12px}.row>div{flex:1}.row small{display:block;color:var(--mute);font-size:14px}
+.tag{font-style:normal;font-size:12px;background:var(--orange);color:#000;padding:1px 6px;border-radius:2px;font-weight:800}
+.rd{font-weight:800;color:var(--mute)}.rd.ok{color:var(--lime)}
+.back{align-self:flex-start;background:none;border:0;color:var(--mute);font:inherit;font-size:16px;cursor:pointer;padding:0}
+#map{position:absolute;inset:0;background:linear-gradient(#1A2A8A99 1px,transparent 1px) 0 0/40px 40px,linear-gradient(90deg,#1A2A8A99 1px,transparent 1px) 0 0/40px 40px,#070F5C}
+#labels{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.pl{position:absolute;left:0;top:0;white-space:nowrap;font:800 italic 1em 'Barlow Condensed',system-ui,sans-serif;text-transform:uppercase;letter-spacing:1px;color:#E8F04A;text-shadow:3px 3px 2px #000}
+.pl.city{font-size:1.3em}.pl.village{font-size:.85em}
+.maplibregl-map{position:relative;overflow:hidden}.maplibregl-canvas{position:absolute;left:0;top:0;touch-action:none}.maplibregl-marker{position:absolute;top:0;left:0;will-change:transform;z-index:2}
+#top{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:10px;padding:8px 12px;background:#050B24ee;border-bottom:1px solid var(--line);z-index:5}
+#top .logo{font-size:24px}.code{font-weight:800;letter-spacing:3px;color:var(--lime);margin-left:auto}
+.pill{font-weight:800;font-size:14px;letter-spacing:1px;padding:2px 8px;border:1px solid var(--mute);color:var(--mute)}.pill.LIVE{color:#000;background:var(--orange);border-color:var(--orange)}.pill.WAITING,.pill.PAUSED{color:var(--yellow);border-color:var(--yellow)}
+.dot{width:10px;height:10px;border-radius:50%;background:#3ddc84}.dot.off{background:#ff4d4d}
+.demo{background:var(--orange);color:#000;font-weight:800;font-size:12px;padding:1px 6px}
+#hud{position:absolute;top:52px;left:8px;right:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px;z-index:4;pointer-events:none}
+.cell{background:#05070Dee;border:1px solid #1A2A8A;border-bottom:2px solid var(--orange);padding:6px 10px}.cell small{display:block;color:var(--mute);font-size:13px;letter-spacing:1px}.cell b{font-size:28px;font-weight:800;line-height:1.05}.cell.w{grid-column:span 2}
+#ctl{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:6px;z-index:4}
+#ctl button{width:44px;height:44px;background:#05070Dee;border:1px solid var(--hunter);color:var(--white);font:800 22px inherit;font-family:inherit;cursor:pointer}
+#nav{position:absolute;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(5,1fr);background:#05070Df5;border-top:1px solid var(--line);z-index:6}
+#nav button{height:54px;background:none;border:0;color:var(--mute);font:800 15px inherit;font-family:inherit;letter-spacing:1px;text-transform:uppercase;cursor:pointer}#nav button.on{color:var(--yellow);box-shadow:inset 0 3px var(--yellow)}
+#sheet{position:absolute;left:0;right:0;bottom:54px;max-height:58%;overflow:auto;background:#05070Df8;border-top:2px solid var(--hunter);padding:12px;display:none;flex-direction:column;gap:8px;z-index:5}#sheet.on{display:flex}
+#off{position:absolute;left:8px;bottom:72px;z-index:4;height:44px;font-size:16px}.btn:disabled{opacity:.55}
+#warn{position:absolute;left:8px;right:8px;bottom:120px;background:var(--orange);color:#000;padding:6px 10px;font-weight:700;font-size:15px;z-index:4;display:none}
+.attr{position:absolute;left:4px;bottom:58px;font-size:11px;color:var(--mute);z-index:3}
+.mk{--c:#FFB81C;position:relative;width:46px;height:46px;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--c) 40%,transparent),transparent 70%);filter:drop-shadow(0 0 6px var(--c))}
+.mk::after{content:"";position:absolute;inset:4px;border:2px solid var(--c);border-radius:50%;animation:p 1.8s ease-out infinite}
+.mk.j{--c:#168BFF}.mk.stale{opacity:.6}
+.mk .lb{position:absolute;top:44px;white-space:nowrap;font-size:13px;font-weight:800;color:var(--lime);text-shadow:0 0 3px #000,0 0 3px #000}
+@keyframes p{from{transform:scale(.7);opacity:1}to{transform:scale(1.5);opacity:0}}
+#cd{position:absolute;inset:0;display:none;place-items:center;background:#050B24dd;font-size:160px;font-weight:800;color:var(--yellow);z-index:20}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:90px;background:var(--panel);border:1px solid var(--yellow);padding:10px 14px;z-index:30;display:none;max-width:90%;font-size:16px}
+dialog{background:var(--panel);color:var(--white);border:1px solid var(--hunter);padding:20px;max-width:480px;margin:auto}dialog::backdrop{background:#000a}
+table{width:100%;border-collapse:collapse}td,th{padding:6px;border-bottom:1px solid var(--line);text-align:left}
+.big{font-size:64px;font-weight:800;line-height:1;text-transform:uppercase;font-style:italic}
+</style></head><body><div id="app">
+
+<section class="screen on" id="s-welcome">
+<div id="wi"></div><div class="logo">BOEF<span>JACHT</span></div>
+<p class="tag1">De boef is op de vlucht. De jagers zitten erachteraan.</p>
+<button class="btn y" onclick="show('create')">Start een spel</button>
+<button class="btn" onclick="show('join')">Join een spel</button>
+<button class="btn" onclick="$('#how').showModal()">Hoe werkt het?</button>
+<p class="note" style="text-align:left">Demo-modus: spelers en bewegingen zijn gesimuleerd en gelabeld als DEMO. Live multiplayer vraagt een gekoppelde backend.</p>
+</section>
+
+<section class="screen" id="s-create">
+<button class="back" onclick="show('welcome')">← Terug</button><h2>Nieuw spel</h2>
+<label>Spelnaam<input id="gname" value="Stadsjacht" maxlength="24"></label>
+<label>Jouw rol<select id="gr"><option value="boef">Boef</option><option value="jager">Jager</option></select></label>
+<label>Aantal jagers<select id="gn"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label>
+<label>Speelduur<select id="gd"><option value="2">2 min</option><option value="5" selected>5 min</option><option value="10">10 min</option><option value="20">20 min</option><option value="30">30 min</option><option value="60">60 min</option></select></label>
+<label>Zichtbaarheid boef<select id="gv"><option value="interval" selected>Per interval</option><option value="always">Altijd live</option><option value="hidden">Verborgen (alleen startpunt)</option></select></label>
+<label>Update-interval<select id="ge"><option value="10">10 s</option><option value="30" selected>30 s</option><option value="60">60 s</option></select></label>
+<label>Voorsprong boef<select id="gh"><option value="0">Geen</option><option value="10" selected>10 s</option><option value="30">30 s</option></select></label>
+<label>Vangst bevestigen<select id="gc"><option value="hunter">Jager bevestigt (binnen 25 m)</option><option value="gm">Alleen gamemaster</option></select></label>
+<label>Krimpende zone<select id="gz"><option value="0">Uit</option><option value="1">Aan (800 m → 250 m)</option></select></label>
+<label class="chk"><input type="checkbox" id="ggps"><span>Gebruik mijn echte GPS. We vragen locatietoestemming om jouw marker live te tonen; alleen op dit apparaat, niets wordt gedeeld.</span></label>
+<label class="chk"><input type="checkbox" id="gnot" checked><span>Meldingen en trillen bij pings, zone-krimp en einde. Werkt alleen terwijl de pagina open staat; meldingen bij een vergrendelde telefoon vragen een push-server.</span></label>
+<label class="chk"><input type="checkbox" id="safe"><span>Veilig spelen: geen privéterrein, geen gevaarlijke zones, niet het verkeer hinderen, niemand in onveilige situaties achtervolgen.</span></label>
+<button class="btn y" onclick="create()">Maak spel</button>
+</section>
+
+<section class="screen" id="s-join">
+<button class="back" onclick="show('welcome')">← Terug</button><h2>Join een spel</h2>
+<label>Spelcode<input id="jc" maxlength="5" placeholder="ABCDE" style="text-transform:uppercase;letter-spacing:6px;font-size:26px"></label>
+<button class="btn y" onclick="find()">Zoek spel</button><div id="jr"></div>
+<p class="note">Codes van andere apparaten werken pas na koppeling met een backend (Supabase). In deze demo vind je alleen spellen die op dit apparaat zijn gemaakt.</p>
+</section>
+
+<section class="screen" id="s-lobby">
+<h2 id="ln"></h2><div style="color:var(--mute)">CODE <b class="code" id="lc" style="margin:0 8px"></b><button class="btn sm" onclick="copy()">Kopieer</button></div>
+<div id="lp" style="display:flex;flex-direction:column;gap:6px"></div><div class="note" id="lr"></div>
+<button class="btn" onclick="tgl()">Ik ben klaar / niet klaar</button>
+<button class="btn y" onclick="startCd()">Start spel (gamemaster)</button>
+</section>
+
+<section class="screen" id="s-live">
+<div id="map"></div>
+<div id="top"><div class="logo">BOEF<span>JACHT</span></div><span class="demo">DEMO</span><span class="pill WAITING" id="st">WAITING</span><span class="code" id="tc"></span><span class="dot" id="cn" title="Verbinding"></span></div>
+<div id="hud"></div>
+<div id="ctl"><button onclick="S.map.zoomIn()">+</button><button onclick="S.map.zoomOut()">−</button><button onclick="center()" title="Centreer">◎</button></div>
+<div id="warn"></div><button class="btn y" id="off" onclick="goOff()" style="display:none"></button><div class="attr">© OpenStreetMap-bijdragers</div>
+<div id="sheet"></div>
+<div id="nav"><button class="on" onclick="tab('map')">Kaart</button><button onclick="tab('players')">Spelers</button><button onclick="tab('info')">Spel</button><button onclick="tab('radio')">Radio</button><button onclick="tab('set')">Opties</button></div>
+<div id="cd"></div>
+</section>
+
+<section class="screen" id="s-results"><div id="rs"></div></section>
+
+<div id="toast"></div>
+<dialog id="how"><h2>Hoe werkt het?</h2><p style="margin:10px 0">De boef vlucht, de jagers volgen. Afhankelijk van de regels zien jagers de boef live, per interval of alleen de laatst bekende positie. Het spel eindigt als de tijd om is (ontsnapt) of via de ingestelde vangstmethode (gepakt).</p><p class="note">Status: kaart, markers, afstanden, timer en regels werken. Spelers zijn gesimuleerd (DEMO). Echte multiplayer vereist Supabase (tabellen, Realtime en toegangsregels per spel); die is nog niet gekoppeld.</p><br><form method="dialog"><button class="btn y">Sluiten</button></form></dialog>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script>
+const $=s=>document.querySelector(s),R=6371000,rad=Math.PI/180,C0=[4.9447,51.3227];
+const runner=(c,s=30)=>`<svg viewBox="0 0 32 32" width="${s}" height="${s}" fill="none" stroke="${c}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="21" cy="6" r="3" fill="${c}"/><path d="M18 11l-4 7 5 4-2 6M14 18l-4 8M18 11l5 4 4-1M17 12l-5 2-3 4"/></svg>`;
+$('#wi').innerHTML=runner('#FFB81C',64);
+const dist=(a,b)=>{const x=Math.sin((b[1]-a[1])*rad/2)**2+Math.cos(a[1]*rad)*Math.cos(b[1]*rad)*Math.sin((b[0]-a[0])*rad/2)**2;return 2*R*Math.asin(Math.sqrt(x))};
+const brg=(a,b)=>Math.atan2((b[0]-a[0])*Math.cos(a[1]*rad),b[1]-a[1]);
+const fD=m=>m<1000?Math.round(m)+' M':(m/1000).toFixed(2)+' KM';
+const fT=s=>{s=Math.max(0,Math.round(s));return[Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(n=>String(n).padStart(2,'0')).join(':')};
+let S={screen:'welcome',tab:'map',status:'WAITING'};
+function show(id){document.querySelectorAll('.screen').forEach(e=>e.classList.toggle('on',e.id==='s-'+id));S.screen=id}
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(S.tt);S.tt=setTimeout(()=>e.style.display='none',3500)}
+const meP=()=>S.P.find(p=>!p.demo);
+function create(){
+ if(!$('#safe').checked)return toast('Accepteer eerst de veiligheidsregels.');
+ const f=i=>$('#'+i).value;
+ S.cfg={name:f('gname')||'Stadsjacht',n:+f('gn'),dur:+f('gd'),every:+f('ge'),vis:f('gv'),head:+f('gh'),cap:f('gc'),zone:f('gz')==='1'};
+ S.role=f('gr');S.gps=$('#ggps').checked;S.C=C0;S.fixed=0;S.not=$('#gnot').checked;if(S.not&&window.Notification&&Notification.permission==='default')Notification.requestPermission();
+ S.code=Array.from({length:5},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.random()*32|0]).join('');
+ const nm=['Noor','Daan','Lotte','Milan'];
+ S.P=[{id:'b',team:'boef',name:S.role==='boef'?'Jij':'Boef',demo:S.role!=='boef',pos:[...C0]}];
+ for(let i=0;i<S.cfg.n;i++){const me=i==0&&S.role==='jager',a=Math.random()*6.28,d=450+Math.random()*200;
+  S.P.push({id:'h'+i,team:'jager',name:me?'Jij':nm[i],demo:!me,pos:[C0[0]+d*Math.sin(a)/(111320*Math.cos(C0[1]*rad)),C0[1]+d*Math.cos(a)/111320]})}
+ S.P.forEach((p,i)=>{p.m=0;p.ready=false;p.last=Date.now();if(p.demo)setTimeout(()=>{p.ready=true;S.screen==='lobby'&&lobby()},1200*(i+1))});
+ if(S.gps)startGps();lobby();show('lobby')}
+function find(){const c=$('#jc').value.toUpperCase().trim(),r=$('#jr');
+ if(S.code&&c===S.code)r.innerHTML=`<div class=row><div><b>${S.cfg.name}</b><small>${S.P.length} spelers · Beschikbare rol: Jager (demo)</small></div></div><button class="btn y" style="width:100%;margin-top:8px" onclick="lobby();show('lobby')">Naar lobby</button>`;
+ else r.innerHTML='<p class="note">Geen spel gevonden met deze code op dit apparaat.</p>'}
+function lobby(){$('#ln').textContent=S.cfg.name;$('#lc').textContent=S.code;
+ $('#lp').innerHTML=S.P.map(p=>`<div class=row>${runner(p.team==='boef'?'#FFB81C':'#168BFF')}<div><b>${p.name}</b> ${p.demo?'<i class=tag>DEMO</i>':''}<small>${p.team.toUpperCase()}</small></div><span class="rd ${p.ready?'ok':''}">${p.ready?'KLAAR':'WACHT'}</span></div>`).join('');
+ const c=S.cfg;$('#lr').innerHTML=`Regels: ${c.dur} min · boef ${c.vis==='always'?'altijd live':c.vis==='hidden'?'verborgen':'zichtbaar elke '+c.every+' s'} · voorsprong ${c.head} s · vangst: ${c.cap==='hunter'?'jager bevestigt':'gamemaster'}.${c.zone?' Krimpende zone aan: >30 s buiten = live zichtbaar, >2 min buiten = uit de ronde.':''}${c.dur>=20?' Boef mag na 5 min eenmalig 3 min offline.':''} Veilig spelen: geen privéterrein, geen gevaar, geen verkeer hinderen.`}
+function tgl(){const m=meP();m.ready=!m.ready;lobby()}
+function copy(){navigator.clipboard?.writeText(S.code).then(()=>toast('Code gekopieerd'),()=>toast('Code: '+S.code))}
+function startCd(){if(S.P.some(p=>!p.ready))return toast('Wacht tot alle spelers klaar zijn.');
+ show('live');S.status='WAITING';initMap();let n=3;const e=$('#cd');e.style.display='grid';e.textContent=n;
+ const i=setInterval(()=>{n--;if(n<=0){clearInterval(i);e.style.display='none';go()}else e.textContent=n},1000)}
+const circ=(c,r)=>{const a=[];for(let i=0;i<=64;i++){const t=i/64*6.2832;a.push([c[0]+r*Math.sin(t)/(111320*Math.cos(c[1]*rad)),c[1]+r*Math.cos(t)/111320])}return a};
+function zdraw(){const s=S.map&&S.map.getSource('zone');if(!s||!S.zr)return;const f=[{type:'Feature',properties:{k:'cur'},geometry:{type:'LineString',coordinates:circ(S.C,S.zr)}}];if(S.zn)f.push({type:'Feature',properties:{k:'next'},geometry:{type:'LineString',coordinates:circ(S.C,S.zn)}});s.setData({type:'FeatureCollection',features:f})}
+function ping(t,b){toast(t+' · '+b);if(S.not){navigator.vibrate&&navigator.vibrate([200,100,200]);try{Notification.permission==='granted'&&new Notification(t,{body:b})}catch(e){}}}
+function zone(el){S.offl=S.offEnd?Math.max(0,Math.ceil(S.offEnd-el)):0;if(!S.cfg.zone){S.zr=0;S.zn=0;return}
+ const st=S.cfg.dur*15,k=Math.min(3,Math.floor(el/st)),Rs=[800,600,400,250];S.zr=Rs[k];S.zn=Rs[k+1]||0;S.zt=(k+1)*st-el;
+ if(k!==S.zk){S.zk>=0&&ping('Zone gekrompen','Nu '+S.zr+' m.');S.zk=k;S.zw=0}
+ if(S.zn&&!S.zw&&S.zt<=Math.min(60,st/2)){S.zw=1;ping('Zone krimpt over '+(st>=120?'1 min':Math.round(S.zt)+' s'),'Naar '+S.zn+' m. Zorg dat je binnen de nieuwe rand bent.')}
+ S.out=dist(S.P[0].pos,S.C)>S.zr?(S.out||0)+1:0;zdraw()}
+function goOff(){if(S.el<300)return toast('Offline kan pas na 5 minuten.');if(S.offUsed||S.status!=='LIVE')return;S.offUsed=1;S.offEnd=S.el+180;ping('Offline','Je locatie wordt 3 minuten niet gedeeld.')}
+function say(){const i=$('#ci');if(!i||!i.value.trim())return;S.chat=S.chat||[];S.chat.push({n:'Jij',t:i.value.trim().replace(/</g,'&lt;')});const b=S.P.slice(1).find(p=>p.demo);if(b)setTimeout(()=>{S.chat.push({n:b.name,d:1,t:['Ik zie hem!','Check de brug.','Ik ben onderweg.','Dek de rivier.'][Math.random()*4|0]});sheet()},1500);sheet()}
+function go(){S.status='LIVE';S.t0=Date.now();S.el=0;S.seen={pos:null,t:-999};S.trail=[];S.m0=S.P.map(p=>p.m);S.offUsed=0;S.offEnd=0;S.out=0;S.zk=-1;S.chat=[];zone(0);updSeen(true);S.iv=setInterval(tick,1000);draw()}
+function initMap(){if(S.map){S.map.remove();S.mk={}}
+ $('#tc').textContent=S.code;$('#warn').style.display='none';
+ const road=(f,col,w)=>({type:'line',source:'om','source-layer':'transportation',filter:['in','class',...f],paint:{'line-color':col,'line-width':w},layout:{'line-cap':'round'}});
+ const z=(a,b,c,d)=>['interpolate',['linear'],['zoom'],a,b,c,d];
+ const style={version:8,sources:{om:{type:'vector',url:'https://tiles.openfreemap.org/planet'},trail:{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:[]}}},zone:{type:'geojson',data:{type:'FeatureCollection',features:[]}}},
+ layers:[
+ {id:'water',type:'fill',source:'om','source-layer':'water',paint:{'fill-color':'#2A6CB5'}},
+ {id:'ww',type:'line',source:'om','source-layer':'waterway',paint:{'line-color':'#2A6CB5','line-width':z(8,1,16,5)}},
+ {id:'rail',...road(['rail'],'#4A4268',z(10,.8,16,3))},
+ {id:'local',...road(['minor','service','tertiary','secondary','primary'],'#DDD6BC',z(10,.5,16,3.5))},
+ {id:'hw',...road(['motorway','trunk'],'#FFC21F',z(7,1.5,16,9))},
+ {id:'trail',type:'line',source:'trail',paint:{'line-color':'#C020A0','line-width':3,'line-dasharray':[2,2]}},{id:'zc',type:'line',source:'zone',filter:['==',['get','k'],'cur'],paint:{'line-color':'#F26A1B','line-width':4}},{id:'zn',type:'line',source:'zone',filter:['==',['get','k'],'next'],paint:{'line-color':'#E8F04A','line-width':2,'line-dasharray':[2,2]}}]};
+ S.map=new maplibregl.Map({container:'map',style,center:S.C,zoom:14.3,attributionControl:false,dragRotate:false,pitchWithRotate:false});
+ S.mk={};let ok=0;S.lab={};const L=document.createElement('div');L.id='labels';S.map.getContainer().appendChild(L);
+ const upd=()=>{S.map.querySourceFeatures('om',{sourceLayer:'place',filter:['in','class','city','town','village']}).forEach(f=>{const n=f.properties.name;if(n&&!S.lab[n]){const e=document.createElement('span'),c=f.properties.class;e.textContent=n;e.className='pl '+c;L.appendChild(e);S.lab[n]={e,c,ll:f.geometry.coordinates}}})};
+ const pos=()=>{const zm=S.map.getZoom();L.style.fontSize=Math.max(14,Math.min(30,(zm-4)*2.6))+'px';for(const k in S.lab){const o=S.lab[k],p=S.map.project(o.ll);o.e.style.display=(o.c==='village'&&zm<11)?'none':'';o.e.style.transform=`translate(${p.x}px,${p.y}px) translate(-50%,-50%)`}};
+ S.map.on('idle',upd).on('moveend',upd).on('render',pos);
+ S.map.on('sourcedata',e=>{if(e.sourceId==='om'&&e.isSourceLoaded){ok=1;$('#warn').style.display='none'}});
+ S.map.on('error',()=>{if(!ok){const w=$('#warn');w.style.display='block';w.textContent='Kaartwegen niet geladen: deze omgeving blokkeert externe kaarttegels. Host de app zelf (HTTPS) voor echte OSM-wegen.'}});
+ requestAnimationFrame(anim)}
+function marker(p){let k=S.mk[p.id];if(!k){const el=document.createElement('div');el.className='mk '+(p.team==='boef'?'':'j');el.innerHTML=runner(p.team==='boef'?'#FFB81C':'#168BFF')+'<span class=lb></span>';k=S.mk[p.id]={el,m:new maplibregl.Marker({element:el}),cur:null,tgt:null,on:0}}return k}
+function setT(p,pos,stale,label){const k=marker(p);if(!pos){if(k.on){k.m.remove();k.on=0}return}k.tgt=pos;if(!k.cur)k.cur=[...pos];if(!k.on){k.m.setLngLat(k.cur).addTo(S.map);k.on=1}k.el.classList.toggle('stale',!!stale);k.el.querySelector('.lb').textContent=label||''}
+function anim(){if(!S.map)return;for(const k of Object.values(S.mk))if(k.on&&k.tgt){k.cur[0]+=(k.tgt[0]-k.cur[0])*.12;k.cur[1]+=(k.tgt[1]-k.cur[1])*.12;k.m.setLngLat(k.cur)}requestAnimationFrame(anim)}
+function startGps(){if(!navigator.geolocation)return toast('Geen GPS in deze browser.');S.gps=true;
+ S.wid=navigator.geolocation.watchPosition(g=>{const me=meP(),np=[g.coords.longitude,g.coords.latitude];
+  if(!S.fixed){const dx=np[0]-me.pos[0],dy=np[1]-me.pos[1];S.P.forEach(p=>p.pos=[p.pos[0]+dx,p.pos[1]+dy]);S.fixed=1;S.C=np;S.map&&S.map.jumpTo({center:np})}
+  else{me.m+=dist(me.pos,np);me.pos=np}me.acc=g.coords.accuracy;me.last=Date.now()},
+  e=>{S.gps=false;toast('GPS geweigerd of niet beschikbaar: '+e.message)},{enableHighAccuracy:true,maximumAge:2000,timeout:20000})}
+function mv(p,b,m){p.pos=[p.pos[0]+m*Math.sin(b)/(111320*Math.cos(p.pos[1]*rad)),p.pos[1]+m*Math.cos(b)/111320];p.m+=m}
+function near(){const b=S.P[0];return S.P.slice(1).map(p=>({p,d:dist(p.pos,b.pos)})).sort((a,c)=>a.d-c.d)[0]}
+function updSeen(force){const b=S.P[0],v=S.cfg.vis,z=S.out>30;
+ if(S.offl>0&&!z&&!force)return;
+ if(force||z||v==='always'||(v==='interval'&&S.el-S.seen.t>=S.cfg.every-.01)){if(!force&&!z&&v==='interval')ping('Ping!',S.role==='boef'?'Je locatie is zojuist naar de jagers gestuurd. Beweeg!':'Nieuwe positie van de boef.');S.seen={pos:[...b.pos],t:S.el};if(v!=='hidden'||force){S.trail.push([...b.pos]);const s=S.map&&S.map.getSource('trail');s&&s.setData({type:'Feature',geometry:{type:'LineString',coordinates:S.trail}})}}}
+function tick(){if(S.status!=='LIVE')return;const el=S.el=(Date.now()-S.t0)/1000,b=S.P[0],me=meP(),live=p=>p===me&&S.fixed;zone(el);
+ if(!live(b)){const n=near();S.hd=n.d<200?brg(n.p.pos,b.pos)+(Math.random()-.5)*.6:(S.hd||0)+(Math.random()-.5)*.5;if(S.cfg.zone&&dist(b.pos,S.C)>S.zr-40)S.hd=brg(b.pos,S.C);mv(b,S.hd,3.5)}
+ if(el>=S.cfg.head)S.P.slice(1).forEach(h=>{if(live(h)||!S.seen.pos)return;const d=dist(h.pos,S.seen.pos);mv(h,brg(h.pos,S.seen.pos)+(Math.random()-.5)*.4,d<15?0:4)});
+ S.P.forEach(p=>{if(p.demo||!S.gps||!S.fixed)p.last=Date.now()});
+ updSeen();if(S.out>120)return end('caught','De boef bleef te lang buiten de zone en ligt uit de ronde.');const n=near();
+ if(S.cfg.cap==='hunter'&&S.role==='boef'&&n.d<15){S.cc=(S.cc||0)+1;if(S.cc>=3)return end('caught')}else S.cc=0;
+ if(el>=S.cfg.dur*60)return end('escaped');draw()}
+function cell(l,v,w){return`<div class="cell ${w?'w':''}"><small>${l}</small><b>${v}</b></div>`}
+function draw(){const b=S.P[0],el=S.el||0,left=S.cfg.dur*60-el,hs=S.P.slice(1),n=near(),jager=S.role==='jager',v=S.cfg.vis;
+ const st=$('#st');st.textContent=S.status;st.className='pill '+S.status;
+ const zc=S.cfg.zone&&S.zn?cell('ZONE '+S.zr+' M → '+S.zn+' M','KRIMPT OVER '+fT(S.zt),1):'';
+ const ob=$('#off');ob.style.display=S.role==='boef'&&S.cfg.dur>=20&&S.status==='LIVE'?'block':'none';ob.disabled=!!S.offUsed||el<300;ob.textContent=S.offl>0?'OFFLINE '+fT(S.offl):S.offUsed?'OFFLINE GEBRUIKT':el<300?'OFFLINE VANAF 05:00':'GA OFFLINE (3 MIN)';
+ const age=el-S.seen.t,stale=v!=='always'&&age>1.5,seenTxt=v==='always'?'LIVE':fT(age)+' GELEDEN';
+ const bp=jager?S.seen.pos:b.pos;setT(b,bp,jager&&stale,jager&&stale?'LAATST GEZIEN '+fT(age):'');
+ hs.forEach(h=>setT(h,jager?h.pos:null,0,h.demo?'DEMO':'JIJ'));
+ if(jager){const d=S.seen.pos?dist(meP().pos,S.seen.pos):0,dt=dist(meP().pos,b.pos);
+  $('#hud').innerHTML=cell('TIJD RESTEREND',fT(left))+cell(stale?'AFSTAND (LAATSTE POSITIE)':'AFSTAND TOT BOEF',fD(d))+cell('ACTIEVE JAGERS',hs.length)+cell(S.offl>0?'BOEF STATUS':'BOEF LAATST GEZIEN',S.offl>0?'OFFLINE':seenTxt)+zc;
+  S.canCatch=dt<25&&S.cfg.cap==='hunter'}
+ else{const nxt=v==='always'?'LIVE':v==='hidden'?'—':Math.max(0,Math.ceil(S.cfg.every-age))+' S';
+  $('#hud').innerHTML=cell('TIJD RESTEREND',fT(left))+cell('VOLGENDE LOCATIE-UPDATE',S.offl>0?'OFFLINE '+fT(S.offl):nxt)+cell('STATUS',S.out>30?'LIVE ZICHTBAAR':S.status)+cell('ESCAPE STATUS',S.out>0?'BUITEN ZONE '+S.out+' / 120 S':'OP DE VLUCHT')+zc;S.canCatch=false}
+ const me=meP(),w=$('#warn');if(S.gps&&me&&S.fixed&&Date.now()-me.last>15000){w.style.display='block';w.textContent='GPS-locatie niet beschikbaar sinds '+fT((Date.now()-me.last)/1000)}else if(S.gps&&me&&me.acc>50){w.style.display='block';w.textContent='GPS-nauwkeurigheid zwak (±'+Math.round(me.acc)+' m)'}else if(!S.warnMap)w.style.display=w.textContent.startsWith('Kaart')?'block':'none';
+ if(S.tab!=='map')sheet()}
+function tab(t){S.tab=t;document.querySelectorAll('#nav button').forEach((b,i)=>b.classList.toggle('on',['map','players','info','radio','set'][i]===t));$('#sheet').classList.toggle('on',t!=='map');sheet()}
+function sheet(){const e=$('#sheet'),t=S.tab;if(t==='map')return;let h='';
+ if(t==='players')h=S.P.map(p=>`<div class=row>${runner(p.team==='boef'?'#FFB81C':'#168BFF')}<div><b>${p.name}</b> ${p.demo?'<i class=tag>DEMO</i>':''}<small>${p.team.toUpperCase()} · ${(p.m/1000).toFixed(2)} km · update ${Math.round((Date.now()-p.last)/1000)} s geleden</small></div><span class="rd ok">${navigator.onLine?'ONLINE':'OFFLINE'}</span></div>`).join('');
+ if(t==='info')h=`<b>${S.cfg.name}</b> · code ${S.code}<p class=note>${$('#lr').textContent}</p>${S.canCatch?'<button class="btn y" onclick="end(\'caught\')">Vangst bevestigen</button>':''}<button class="btn sm" onclick="if(confirm('Gepakt melden als gamemaster?'))end('caught')">GM: boef gepakt</button><button class="btn sm" onclick="if(confirm('Spel beëindigen?'))end('escaped')">GM: boef ontsnapt / einde</button>`;
+ if(t==='set')h=`<button class="btn sm" onclick="startGps()">${S.gps?'Echte GPS actief':'Gebruik mijn echte GPS'}</button><button class="btn sm" onclick="copy()">Kopieer spelcode</button><button class="btn sm" onclick="if(confirm('Spel verlaten?'))reset()">Spel verlaten</button><p class=note>Locatietoestemming wordt alleen gevraagd voor jouw eigen marker. Alle andere spelers zijn DEMO.</p>`;
+ if(t==='radio')h=S.role==='boef'?'<p class=note>Team Radio is voor jagers: alleen jouw team ziet de berichten. Jij bent de enige boef.</p>':`<div style="display:flex;flex-direction:column;gap:6px">${(S.chat||[]).map(m=>`<div class=row><div><small>${m.n}${m.d?' · DEMO':''}</small><b>${m.t}</b></div></div>`).join('')||'<p class=note>Nog geen berichten.</p>'}</div><div style="display:flex;gap:6px"><input id="ci" style="flex:1" placeholder="Bericht aan je team" onkeydown="event.key==='Enter'&&say()"><button class="btn sm" onclick="say()">Stuur</button></div><p class=note>Push-to-talk spraak is nog niet beschikbaar: dat vraagt een realtime audio-backend.</p>`;
+ if(e.dataset.k!==t+h.length||t==='players')e.innerHTML=h;e.dataset.k=t+h.length}
+function center(){const t=S.role==='boef'?S.P[0].pos:(meP().pos);S.map.easeTo({center:t,zoom:15,duration:600})}
+function end(res,why){if(S.status==='FINISHED')return;clearInterval(S.iv);S.status='FINISHED';S.res=res;S.why=why;ping(res==='caught'?'Boef gepakt!':'Tijd! Ronde voorbij.','Bekijk de resultaten.');draw();setTimeout(results,900)}
+function results(){const c=S.res==='caught',d=S.el;
+ $('#rs').innerHTML=`<div style="display:flex;flex-direction:column;gap:12px"><div class="big" style="color:${c?'#168BFF':'#FFC21F'}">${c?'Gepakt':'Ontsnapt'}</div><div>${S.why||(c?'De jagers hebben de boef gevangen.':'De boef is aan de jagers ontsnapt.')}</div>
+ ${cell('SPELDUUR',fT(d),1)}<table><tr><th>Speler</th><th>Afstand</th><th>Eindpositie</th></tr>${S.P.map(p=>`<tr><td>${p.name}${p.demo?' (DEMO)':''}</td><td>${(p.m/1000).toFixed(2)} km</td><td>${p.pos[1].toFixed(5)}, ${p.pos[0].toFixed(5)}</td></tr>`).join('')}</table>
+ <p class="note">Replay van opgeslagen posities is nog niet geïmplementeerd.</p><button class="btn y" onclick="reset()">Opnieuw spelen</button></div>`;show('results')}
+function reset(){clearInterval(S.iv);S.wid!=null&&navigator.geolocation.clearWatch(S.wid);S.map&&S.map.remove();S.map=null;S={screen:'welcome',tab:'map',status:'WAITING'};tab('map');show('welcome')}
+function conn(){$('#cn').classList.toggle('off',!navigator.onLine)}addEventListener('online',conn);addEventListener('offline',conn);conn();
+</script></body></html>
